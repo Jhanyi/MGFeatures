@@ -10,6 +10,8 @@ import napari
 from numba import njit
 from skimage.measure import regionprops
 
+# for SINGLE SLICE.
+
 properties = {}
 
 def draw_bbox(bbox):
@@ -89,7 +91,7 @@ def img_from_tiles(folder, slice='all'):
     '''
     pass
 
-def ER_length(ER):
+def ER_length(ER, labels): # put labels as global variable
     '''
     Calculates total length of ER in a cell.
     :param ER: patched ER from 1 slice. dtype bool or int
@@ -100,7 +102,31 @@ def ER_length(ER):
             ER = ER * 255
         ER = ER.astype(np.uint8)
 
-    ER
+
+    # labels_draw = cv2.cvtColor(labels.astype(np.uint8), cv2.COLOR_GRAY2RGB)
+
+    for region in regionprops(labels):
+        bbox = region.bbox  # returns minr, minc, maxr, maxc
+        ER_crop = ER[bbox[0]:bbox[2], bbox[1]:bbox[3]]
+
+        contours, hierachy = cv2.findContours(image=ER_crop,
+                                              mode=cv2.RETR_TREE,
+                                              method=cv2.CHAIN_APPROX_SIMPLE
+                                              )
+
+        # cv2.drawContours(image=labels_draw[bbox[0]:bbox[2], bbox[1]:bbox[3]],
+        #                  contours=contours,
+        #                  contourIdx=-1,
+        #                  color=(255, 255, 255),
+        #                  thickness=1
+        #                  )
+
+        ER_len = 0
+        for cnt in contours:
+            ER_len_single = cv2.arcLength(cnt, True)
+            # add include only if cnt[0] location isco in label number,
+            ER_len += ER_len_single
+        properties['length'].append(ER_len)
 
 
 #def count organelles
