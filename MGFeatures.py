@@ -8,6 +8,9 @@ import matplotlib.patches as mpatches
 import numpy.ma as ma
 import napari
 from numba import njit
+from skimage.measure import regionprops
+
+properties = {}
 
 def draw_bbox(bbox):
     '''
@@ -78,23 +81,29 @@ def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
 
 def img_from_tiles(folder, slice='all'):
     '''
-
-    :param folder:
-    :param slice:
-    :return:
+    A folder containing image tiles FROM 1 SEGMENTATION OBJECT exported from VAST. Has the format <filename>.vsseg_export_s%z%_Y%y%_X%x%.tif
+    run this function for every segmentation object
+    :param folder: folder containing 1 segmentation object exported from VAST
+    :param slice: list of slice number to export. use slice='all' for exporting all slices
+    :return: patched image from the tiles.
     '''
     pass
 
+def ER_length(ER):
+    '''
+    Calculates total length of ER in a cell.
+    :param ER: patched ER from 1 slice. dtype bool or int
+    :return: updates properties['ER_length']
+    '''
+    if ER.dtype != np.uint8:
+        if ER.dtype == bool:
+            ER = ER * 255
+        ER = ER.astype(np.uint8)
+
+    ER
+
+
+#def count organelles
+
 if __name__ == "__main__":
-    import time
-    labels = io.imread(r'label.tiff')
-    # get_bbox(labels)
-    organelle_mask = io.imread('lys.tiff')
-
-    start = time.perf_counter()
-    organelle_labels = mask_it(labels, organelle_mask)
-    end = time.perf_counter()
-
-    print('time: {}s'.format(end-start))
-
-    io.imsave('organelle_labels_3.tiff', organelle_labels)
+    pass
