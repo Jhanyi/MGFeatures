@@ -44,9 +44,16 @@ def draw_bbox(bbox):
 
 @njit
 def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
-    # assert type(labels) == np.ndarray # why dosent work with numba?
+    '''
+    Takes image label (ndarray of 2 dimensions) and binary mask of the same dimension. Returns labelled organelles corresponding to the cell.
+    :param labels: ndarray
+    :param organelle_mask: ndarray bool
+    :return: organelles labelled with their corresponding cells
+    '''
+    # assert type(labels) == np.ndarray # why assert dosen't work with numba?
     # assert type(organelle_mask) == np.ndarray and (organelle_mask.dtype == bool or np.bool)
 
+    #trying masked array - does not work
     # nroi = labels.max()
     # for i in range(nroi):
 
@@ -63,18 +70,20 @@ def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
             if organelle_mask[i][j] == True:
                 organelle_labels[i][j] = labels[i][j]
 
-
     # list comprehension does not work
     # organelle_labels = np.array([[labels[i][j] for i in range(labels.shape[0]) for j in range(labels.shape[1]) if organelle_mask[i][j] == True]])
     # organelle_labels = np.array([[labels[i][j] for (i, j) in zip(range(labels.shape[0]), range(labels.shape[1])) if organelle_mask[i][j] == True]])
 
-
-    #timeit
     return organelle_labels
 
-#def
+def img_from_tiles(folder, slice='all'):
+    '''
 
-
+    :param folder:
+    :param slice:
+    :return:
+    '''
+    pass
 
 if __name__ == "__main__":
     import time
