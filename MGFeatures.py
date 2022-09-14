@@ -9,30 +9,38 @@ import numpy.ma as ma
 import napari
 from numba import njit
 
-#ignore for now
-def get_bbox(labels:'uint8 ndarray'):
-    fig, ax = plt.subplots(figsize=(10, 6))
+def draw_bbox(bbox):
+    '''
+    Takes a tuple of x and y values for bounding box. Returns an array of coordinates to be passed as data points in napari shape layer
+    :param bbox: Tuple of (minr, minc, maxr, maxc). returned from skimage's region.bbox.
+    :return: 4 x 2 array of path length of a rectangle
+    '''
+    rect = np.array([[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[2], bbox[3]], [bbox[0], bbox[3]]])
+    return rect
 
-    assert type(labels) == np.ndarray
-    ax.imshow(labels)
+# for plotting in io - ignore this
+# def get_bbox(labels:'uint8 ndarray'):
+    # fig, ax = plt.subplots(figsize=(10, 6))
+    #
+    # assert type(labels) == np.ndarray
+    # ax.imshow(labels)
+    #
+    # for region in regionprops(labels):
+    #     minr, minc, maxr, maxc = region.bbox
+    #
+    #     rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
+    #                               fill=False, edgecolor='red', linewidth=2)
+    #
+    #     ax.add_patch(rect)
+    #     ax.plot(minc, minr, 'or')
+    #     ax.plot(minc, maxr, 'or')
+    #     ax.plot(maxc, maxr, 'or')
+    #     ax.plot(maxc, minr, 'or')
+    #
+    # ax.set_axis_off()
+    # plt.tight_layout()
+    # plt.show()
 
-    for region in regionprops(labels):
-        #TODO: add index
-        minr, minc, maxr, maxc = region.bbox
-
-        #TODO: remove or change for validation
-        rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
-                                  fill=False, edgecolor='red', linewidth=2)
-
-        ax.add_patch(rect)
-        ax.plot(minc, minr, 'or')
-        ax.plot(minc, maxr, 'or')
-        ax.plot(maxc, maxr, 'or')
-        ax.plot(maxc, minr, 'or')
-
-    ax.set_axis_off()
-    plt.tight_layout()
-    plt.show()
 
 @njit
 def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
@@ -64,7 +72,7 @@ def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
     #timeit
     return organelle_labels
 
-def
+#def
 
 
 
