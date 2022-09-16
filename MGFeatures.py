@@ -142,6 +142,23 @@ def label_cells(image):
     labels = labels.astype(np.uint8)
     return labels
 
+def get_ratio(item_labels, labels):
+    '''
+    calculate ratio of 2 areas
+    :param item_labels: labelled ndarray of item of choice e.g. organelle, nucleus
+    :param labels: labelled ndarray of cells
+    :return: updates properties['ratio xx']
+    '''
+    ratios = []
+    for i in np.unique(labels)[1:]:
+        organelle_area = len(np.argwhere(item_labels == i))
+        labels_area = len(np.argwhere(labels == i))
+        ratio = organelle_area/labels_area
+        ratios.append(ratio)
+
+    ratios = np.array(ratios)
+    return ratios
+
 def ER_length(ER, labels): # put labels as global variable
     '''
     Calculates total length of ER in a cell.
@@ -154,6 +171,7 @@ def ER_length(ER, labels): # put labels as global variable
         ER = ER.astype(np.uint8)
     
     properties['ER_length'] = []
+    ER_lengths = [] #remove after class is created
 
     # labels_draw = cv2.cvtColor(labels.astype(np.uint8), cv2.COLOR_GRAY2RGB)
 
@@ -179,8 +197,12 @@ def ER_length(ER, labels): # put labels as global variable
             # add include only if cnt[0] location isco in label number,
             ER_len += ER_len_single
             
-        properties['ER_length'].append(ER_len)
+        ER_lengths.append(ER_len)
+
+        #properties['ER_length'].append(ER_len)
     #properties['ER_length'] = np.array(properties['ER_length'])
+    ER_lengths = np.array(ER_lengths)
+    return ER_lengths #remove after class is created
 
 #def count organelles
 
