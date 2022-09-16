@@ -53,11 +53,11 @@ def draw_bbox(bbox):
 
 
 @njit
-def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
+def mask_it(labels:'uint8 ndarray', organelle_mask:'ndarray'):
     '''
     Takes image label (ndarray of 2 dimensions) and binary mask of the same dimension. Returns labelled organelles corresponding to the cell.
     :param labels: ndarray
-    :param organelle_mask: ndarray bool
+    :param organelle_mask: ndarray. non organelle should be 0 or false
     :return: organelles labelled with their corresponding cells
     '''
     # assert type(labels) == np.ndarray # why assert dosen't work with numba?
@@ -73,11 +73,11 @@ def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
     # organelle_labels = ma.array(labels, mask = organelle_mask)
     # io.imshow(organelle_labels)
 
-    organelle_labels = np.zeros((labels.shape))
+    organelle_labels = np.zeros((labels.shape), dtype=np.uint8)
 
     for i in range(labels.shape[0]):
         for j in range(labels.shape[1]):
-            if organelle_mask[i][j] == True:
+            if organelle_mask[i][j] != 0:
                 organelle_labels[i][j] = labels[i][j]
 
     # list comprehension does not work
@@ -165,7 +165,7 @@ def ER_length(ER, labels): # put labels as global variable
                                               mode=cv2.RETR_TREE,
                                               method=cv2.CHAIN_APPROX_SIMPLE
                                               )
-
+        
         # cv2.drawContours(image=labels_draw[bbox[0]:bbox[2], bbox[1]:bbox[3]],
         #                  contours=contours,
         #                  contourIdx=-1,
@@ -178,9 +178,9 @@ def ER_length(ER, labels): # put labels as global variable
             ER_len_single = cv2.arcLength(cnt, True)
             # add include only if cnt[0] location isco in label number,
             ER_len += ER_len_single
-    
+            
         properties['ER_length'].append(ER_len)
-
+    #properties['ER_length'] = np.array(properties['ER_length'])
 
 #def count organelles
 
