@@ -10,6 +10,8 @@ import napari
 from numba import njit
 from skimage.measure import regionprops
 from napari_segment_blobs_and_things_with_membranes import connected_component_labeling
+import glob
+from patchify import patchify, unpatchify
 
 
 # for SINGLE SLICE.
@@ -83,7 +85,10 @@ def mask_it(labels:'uint8 ndarray', organelle_mask:'binary ndarray'):
 
     return organelle_labels
 
-def img_from_tiles(folder, slice='all'):
+
+
+
+def img_from_tiles(folder, sl):
     '''
     A folder containing image tiles FROM 1 SEGMENTATION OBJECT exported from VAST. Has the format <filename>.vsseg_export_s%z%_Y%y%_X%x%.tif
     run this function for every segmentation object
@@ -92,40 +97,38 @@ def img_from_tiles(folder, slice='all'):
     :return: patched image from the tiles.
     '''
 
-    def img_from_tiles(folder, sl):
+    file = r'\*_s{}_*'.format(str(sl).zfill(2))
+    imgfile_list = []
 
-        file = r'\*_s{}_*'.format(str(sl).zfill(2))
-        imgfile_list = []
+    R = 0
+    C = 0
 
-        R = 0
-        C = 0
+    patchsize = (8192, 8192)
 
-        patchsize = (8192, 8192)
+    for imgfile in glob.glob(folder + file):
+        imgfile_list.append(imgfile)
 
-        for imgfile in glob.glob(folder + file):
-            imgfile_list.append(imgfile)
+        r = int(imgfile[-8])
+        c = int(imgfile[-5])
 
-            r = int(imgfile[-8])
-            c = int(imgfile[-5])
+        if r > R:
+            R = r
+        if c > C:
+            C = c
 
-            if r > R:
-                R = r
-            if c > C:
-                C = c
+    imageshape = (R, C, *patchsize)
+    imagepatches = np.zeros(shape=imageshape, dtype=np.uint8)
 
-        imageshape = (R, C, *patchsize)
-        imagepatches = np.zeros(shape=imageshape, dtype=np.uint8)
+    for imgfile in imgfile_list:
+        r = int(imgfile[-8])
+        c = int(imgfile[-5])
 
-        for imgfile in imgfile_list:
-            r = int(imgfile[-8])
-            c = int(imgfile[-5])
+        imagepatches[r - 1, c - 1, :, :] = io.imread(imgfile).astype(np.uint8)
 
-            imagepatches[r - 1, c - 1, :, :] = io.imread(imgfile).astype(np.uint8)
+    image = unpatchify(imagepatches, (patchsize[0] * R, patchsize[1] * C))
+    image = image.astype(np.uint8)
 
-        image = unpatchify(imagepatches, (patchsize[0] * R, patchsize[1] * C))
-        image = image.astype(np.uint8)
-
-        return image
+    return image
 
 def label_cells(image):
     '''
