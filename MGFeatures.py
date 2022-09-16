@@ -12,6 +12,7 @@ from skimage.measure import regionprops
 from napari_segment_blobs_and_things_with_membranes import connected_component_labeling
 import glob
 from patchify import patchify, unpatchify
+import cv2
 
 
 # for SINGLE SLICE.
@@ -151,7 +152,8 @@ def ER_length(ER, labels): # put labels as global variable
         if ER.dtype == bool:
             ER = ER * 255
         ER = ER.astype(np.uint8)
-
+    
+    properties['ER_length'] = []
 
     # labels_draw = cv2.cvtColor(labels.astype(np.uint8), cv2.COLOR_GRAY2RGB)
 
@@ -177,7 +179,7 @@ def ER_length(ER, labels): # put labels as global variable
             # add include only if cnt[0] location isco in label number,
             ER_len += ER_len_single
     
-        properties['length'].append(ER_len)
+        properties['ER_length'].append(ER_len)
 
 
 #def count organelles
