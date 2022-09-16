@@ -89,7 +89,41 @@ def img_from_tiles(folder, slice='all'):
     :param slice: list of slice number to export. use slice='all' for exporting all slices
     :return: patched image from the tiles.
     '''
-    pass
+
+    def img_from_tiles(folder, sl):
+
+        file = r'\*_s{}_*'.format(str(sl).zfill(2))
+        imgfile_list = []
+
+        R = 0
+        C = 0
+
+        patchsize = (8192, 8192)
+
+        for imgfile in glob.glob(folder + file):
+            imgfile_list.append(imgfile)
+
+            r = int(imgfile[-8])
+            c = int(imgfile[-5])
+
+            if r > R:
+                R = r
+            if c > C:
+                C = c
+
+        imageshape = (R, C, *patchsize)
+        imagepatches = np.zeros(shape=imageshape, dtype=np.uint8)
+
+        for imgfile in imgfile_list:
+            r = int(imgfile[-8])
+            c = int(imgfile[-5])
+
+            imagepatches[r - 1, c - 1, :, :] = io.imread(imgfile).astype(np.uint8)
+
+        image = unpatchify(imagepatches, (patchsize[0] * R, patchsize[1] * C))
+        image = image.astype(np.uint8)
+
+        return image
 
 def ER_length(ER, labels): # put labels as global variable
     '''
@@ -126,6 +160,7 @@ def ER_length(ER, labels): # put labels as global variable
             ER_len_single = cv2.arcLength(cnt, True)
             # add include only if cnt[0] location isco in label number,
             ER_len += ER_len_single
+    
         properties['length'].append(ER_len)
 
 
