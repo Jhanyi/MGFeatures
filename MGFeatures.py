@@ -9,6 +9,8 @@ import numpy.ma as ma
 import napari
 from numba import njit
 from skimage.measure import regionprops
+from napari_segment_blobs_and_things_with_membranes import connected_component_labeling
+
 
 # for SINGLE SLICE.
 
@@ -124,6 +126,17 @@ def img_from_tiles(folder, slice='all'):
         image = image.astype(np.uint8)
 
         return image
+
+def label_cells(image):
+    '''
+    converts an ndarray of image to labels. Uses connected compoennt labelling. (needs to proof read with image)
+    :param image: 2D image of ndarray
+    :return: 2D labelled image
+    '''
+    binary_image = image.astype(bool)
+    labels = connected_component_labeling(binary_image)
+    labels = labels.astype(np.uint8)
+    return labels
 
 def ER_length(ER, labels): # put labels as global variable
     '''
