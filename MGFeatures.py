@@ -142,17 +142,17 @@ def label_cells(image):
     labels = labels.astype(np.uint8)
     return labels
 
-def get_ratio(item_labels, labels):
+def get_ratio(labels1, labels2):
     '''
     calculate ratio of 2 areas
-    :param item_labels: labelled ndarray of item of choice e.g. organelle, nucleus
-    :param labels: labelled ndarray of cells
+    :param labels1: labelled ndarray of item of choice e.g. organelle, nucleus
+    :param labels2: labelled ndarray of item of choice e.g. organelle, nucleus
     :return: updates properties['ratio xx']
     '''
     ratios = []
-    for i in np.unique(labels)[1:]:
-        organelle_area = len(np.argwhere(item_labels == i))
-        labels_area = len(np.argwhere(labels == i))
+    for i in np.unique(labels2)[1:]:
+        organelle_area = len(np.argwhere(labels1 == i))
+        labels_area = len(np.argwhere(labels2 == i))
         ratio = organelle_area/labels_area
         ratios.append(ratio)
 
