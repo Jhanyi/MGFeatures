@@ -242,7 +242,7 @@ def count_organelles(organelles_labels, labels):
 
         organelles_count.append(num_labels - 1)
 
-    organelles_count = np.array(organelles_count])
+    organelles_count = np.array(organelles_count)
     return organelles_count
 
 
