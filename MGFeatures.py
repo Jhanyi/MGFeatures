@@ -227,8 +227,8 @@ def count_organelles(organelles_labels, labels):
         bbox = region.bbox
         organelles_label = organelles_labels[bbox[0]:bbox[2], bbox[1]:bbox[3]]
 
-        bbox_rect = draw_bbox(bbox)
-        bbox_rects.append(bbox_rect)
+        # bbox_rect = draw_bbox(bbox)
+        # bbox_rects.append(bbox_rect)
 
         organelles_label_num = region.label
         # print(lys_label_num)
