@@ -18,6 +18,9 @@ import cv2
 # for SINGLE SLICE.
 
 properties = {}
+cell_folder = ''
+sl_num = 1
+#cell_labels = None
 
 def draw_bbox(bbox):
     '''
@@ -142,42 +145,48 @@ def label_cells(image):
     labels = labels.astype(np.uint8)
     return labels
 
-def get_ratio(labels1, labels2):
-    '''
-    calculate ratio of 2 areas
-    :param labels1: labelled ndarray of item of choice e.g. organelle, nucleus
-    :param labels2: labelled ndarray of item of choice e.g. organelle, nucleus
-    :return: updates properties['ratio xx']
-    '''
-    ratios = []
-    for i in np.unique(labels2)[1:]:
-        organelle_area = len(np.argwhere(labels1 == i))
-        labels_area = len(np.argwhere(labels2 == i))
-        ratio = organelle_area/labels_area
-        ratios.append(ratio)
-
-    ratios = np.array(ratios)
-    return ratios
+# def get_ratio(labels1, labels2):
+#     '''
+#     calculate ratio of 2 areas
+#     :param labels1: labelled ndarray of item of choice e.g. organelle, nucleus
+#     :param labels2: labelled ndarray of item of choice e.g. organelle, nucleus
+#     :return: updates properties['ratio xx']
+#     '''
+#     ratios = []
+#     for i in np.unique(labels2)[1:]:
+#         organelle_area = len(np.argwhere(labels1 == i))
+#         labels_area = len(np.argwhere(labels2 == i))
+#         ratio = organelle_area/labels_area
+#         ratios.append(ratio)
+#
+#     ratios = np.array(ratios)
+#     return ratios
 
 def ER_length(ER, labels): # put labels as global variable
     '''
     Calculates total length of ER in a cell.
     :param ER: patched ER from 1 slice. dtype bool or int
-    :return: updates properties['ER_length']
+    :param labels: cell labels
+    :return: properties['ER_length']
     '''
     if ER.dtype != np.uint8:
         if ER.dtype == bool:
             ER = ER * 255
         ER = ER.astype(np.uint8)
     
-    properties['ER_length'] = []
+    # properties['ER_length'] = []
     ER_lengths = [] #remove after class is created
 
     # labels_draw = cv2.cvtColor(labels.astype(np.uint8), cv2.COLOR_GRAY2RGB)
 
     for region in regionprops(labels):
+        label_num = region.label
+        # threshold = label_num - 1
+
         bbox = region.bbox  # returns minr, minc, maxr, maxc
         ER_crop = ER[bbox[0]:bbox[2], bbox[1]:bbox[3]]
+        # ER_crop = ER_crop > threshold #thresholding to remove overlapping bboxes with other labels
+        # ER_crop = ER_crop.astype(np.uint8)
 
         contours, hierachy = cv2.findContours(image=ER_crop,
                                               mode=cv2.RETR_TREE,
@@ -194,7 +203,7 @@ def ER_length(ER, labels): # put labels as global variable
         ER_len = 0
         for cnt in contours:
             ER_len_single = cv2.arcLength(cnt, True)
-            # add include only if cnt[0] location isco in label number,
+            # add include only if cnt[0] location is in label number,
             ER_len += ER_len_single
             
         ER_lengths.append(ER_len)
@@ -204,7 +213,39 @@ def ER_length(ER, labels): # put labels as global variable
     ER_lengths = np.array(ER_lengths)
     return ER_lengths #remove after class is created
 
-#def count organelles
+def count_organelles(organelles_labels, labels):
+    '''
+    Calculates number of organelles per cell
+    :param organelles_labels: ndarray of organelles lavels
+    :param labels: cell labels
+    :return: properties['organelle_count']
+    '''
+    #properties['organelle_count'] = []
+    organelles_count = []
+
+    for region in regionprops(labels): #optimise this part - also used in ER functions
+        bbox = region.bbox
+        organelles_label = organelles_labels[bbox[0]:bbox[2], bbox[1]:bbox[3]]
+
+        bbox_rect = draw_bbox(bbox)
+        bbox_rects.append(bbox_rect)
+
+        organelles_label_num = region.label
+        # print(lys_label_num)
+        threshold = organelles_label_num - 1
+        organelles_bi = organelles_label > threshold  # anyway to optimise this?
+        organelles_bi = organelles_bi * 1
+        organelles_bi = organelles_bi.astype(np.uint8)
+
+
+        num_labels, l = cv2.connectedComponents(organelles_bi, connectivity=4)  #why num_labels is 1 extra?
+
+        organelles_count.append(num_labels - 1)
+
+    organelles_count = np.array(organelles_count])
+    return organelles_count
+
+
 
 if __name__ == "__main__":
     pass
