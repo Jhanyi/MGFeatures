@@ -7,6 +7,7 @@ from scipy import sparse
 import matplotlib.patches as mpatches
 import numpy.ma as ma
 import napari
+import numba
 from numba import njit
 from skimage.measure import regionprops
 from napari_segment_blobs_and_things_with_membranes import connected_component_labeling
@@ -213,6 +214,7 @@ def ER_length(ER, labels): # put labels as global variable
     ER_lengths = np.array(ER_lengths)
     return ER_lengths #remove after class is created
 
+"""
 def count_organelles(organelles_labels, labels):
     '''
     Calculates number of organelles per cell
@@ -244,7 +246,86 @@ def count_organelles(organelles_labels, labels):
 
     organelles_count = np.array(organelles_count)
     return organelles_count
+"""
 
+
+
+@njit(nopython=True)
+def pad(img, new_arr, n, m):
+    for i in range(n):
+        for j in range(m):
+            new_arr[i + 1][j + 1] = img[i][j]
+
+
+@njit(nopython=True)
+def find_first_2d(arr, start):
+    m = len(arr[0])
+    for i in range(start, len(arr)):
+        for j in range(m):
+            if arr[i][j] > 0:
+                return (i, j)
+    return (-1, -1)
+
+
+@njit(nopython=True)
+def get_neighbours(px, n, m):
+    nbs = [(px[0], px[1] + 1), (px[0], px[1] - 1), (px[0] + 1, px[1]), (px[0] - 1, px[1])]
+    
+    if px[0] == 0:
+        nbs.remove((px[0], px[1] - 1))
+    elif px[0] == n:
+        nbs.remove((px[0], px[1] + 1))
+        
+    if px[1] == 0:
+        nbs.remove((px[0], px[1] - 1))
+    elif px[1] == m:
+        nbs.remove((px[0], px[1] + 1))
+    
+    return nbs
+        
+
+@njit(nopython=True)
+def expand(origin, arr, n, m):
+    cell = arr[origin[0]][origin[1]]
+    new_gen = [origin]
+    while new_gen:
+        cur_gen = [*set(new_gen)]
+        new_gen = []
+        for px in cur_gen:
+            if arr[px[0]][px[1]] == cell:
+                arr[px[0]][px[1]] = 0
+                new_gen.extend(get_neighbours(px, n, m))
+    return cell
+
+
+@njit(nopython=True)
+def contains(l, val):
+    for el in l:
+        if el == val:
+            return True
+    return False
+
+
+@njit(nopython=True)
+def count_organelles(arr, n, m):
+    '''
+    Calculates number of organelles.
+    :param arr: numpy array with labeled organelles
+    :param n: number of rows 
+    :param m: number of columns
+    :return: dictionary of cell value -> organelle count
+    '''
+    lys_count = {}
+
+    origin = find_first_2d(arr, 0)
+    while origin != (-1, -1):
+        val = int(expand(origin, arr, n, m))
+        if not contains(lys_count.keys(), val):
+            lys_count[val] = 0
+        lys_count[val] += 1
+        origin = find_first_2d(arr, origin[0])
+
+    return lys_count
 
 
 if __name__ == "__main__":
