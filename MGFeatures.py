@@ -307,25 +307,38 @@ def contains(l, val):
 
 
 @njit(nopython=True)
-def count_organelles(arr, n, m):
+def count_organelles(arr, n, m, cells):
     '''
     Calculates number of organelles.
     :param arr: numpy array with labeled organelles
     :param n: number of rows 
     :param m: number of columns
-    :return: dictionary of cell value -> organelle count
+    :param cells: list of cell values (sorted)
+    :return: list of organelle count, sorted by cell value
     '''
-    lys_count = {}
+    org_count = {}
 
     origin = find_first_2d(arr, 0)
     while origin != (-1, -1):
         val = int(expand(origin, arr, n, m))
-        if not contains(lys_count.keys(), val):
-            lys_count[val] = 0
-        lys_count[val] += 1
+        if not contains(org_count.keys(), val):
+            org_count[val] = 0
+        org_count[val] += 1
         origin = find_first_2d(arr, origin[0])
 
-    return lys_count
+    count_by_cell = []
+    keys = org_count.keys()
+    for c in cells:
+        if c in keys:
+            count_by_cell.append(org_count[c])
+        else:
+            count_by_cell.append(0)
+
+    return count_by_cell
+
+
+def individual_cells(cell_labels):
+    return np.unique(cell_labels)[1:]
 
 
 if __name__ == "__main__":
