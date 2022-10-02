@@ -8,9 +8,9 @@ Segmentatation data found in (misgeld server) X:\Hanyi\MG
 
 ## Data
 
-images: https://drive.google.com/drive/folders/14HdcGGN070OSdpeh_6R-mhPd-ajXkeZG?usp=sharing
+exmaple images [here](https://drive.google.com/drive/folders/14HdcGGN070OSdpeh_6R-mhPd-ajXkeZG?usp=sharing)
 
-view interactive plot to get vast coordinates: https://nbviewer.org/github/Jhanyi/MGFeatures/blob/main/Plot%20of%20all%20features.ipynb
+view [interactive plot](https://nbviewer.org/github/Jhanyi/MGFeatures/blob/main/Plot%20of%20all%20features.ipynb) to get vast coordinates
 
 Corresponding raw data of the segmentation (i.e. areas) found in featuresraw_v05.xlsx
 
