@@ -32,6 +32,20 @@ def draw_bbox(bbox):
     rect = np.array([[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[2], bbox[3]], [bbox[0], bbox[3]]])
     return rect
 
+def remake_bbox(bbox_asstring, stack=True):
+    numbers = ''.join([i if i!='[' and i!=']' and i!='\n ' else '' for i in bbox_asstring])
+    arr_flat = np.array([int(i) for i in numbers.split(' ') if i!=''])
+    if stack:
+        bbox = arr_flat.reshape((4,3))
+    else:
+        bbox = arr_flat.reshape((4,2))
+    return bbox
+
+def make_bbox_stack(slices, bbox_slice):
+    sls = [np.array([[sl_num]*4]).T for sl_num in slices]
+    bbox_stack = [np.hstack((sl, bbox)) for sl,bbox in zip(sls, bbox_slice)]
+    return bbox_stack
+
 # for plotting in io - ignore this
 # def get_bbox(labels:'uint8 ndarray'):
     # fig, ax = plt.subplots(figsize=(10, 6))
