@@ -264,14 +264,14 @@ def count_organelles(organelles_labels, labels):
 
 
 
-@njit(nopython=True)
+@njit #(nopython=True)
 def pad(img, new_arr, n, m):
     for i in range(n):
         for j in range(m):
             new_arr[i + 1][j + 1] = img[i][j]
 
 
-@njit(nopython=True)
+@njit #(nopython=True)
 def find_first_2d(arr, start):
     m = len(arr[0])
     for i in range(start, len(arr)):
@@ -281,7 +281,7 @@ def find_first_2d(arr, start):
     return (-1, -1)
 
 
-@njit(nopython=True)
+@njit #(nopython=True)
 def get_neighbours(px, n, m):
     nbs = [(px[0], px[1] + 1), (px[0], px[1] - 1), (px[0] + 1, px[1]), (px[0] - 1, px[1])]
     
@@ -298,7 +298,7 @@ def get_neighbours(px, n, m):
     return nbs
         
 
-@njit(nopython=True)
+@njit #(nopython=True)
 def expand(origin, arr, n, m):
     cell = arr[origin[0]][origin[1]]
     new_gen = [origin]
@@ -312,7 +312,7 @@ def expand(origin, arr, n, m):
     return cell
 
 
-@njit(nopython=True)
+@njit #(nopython=True)
 def contains(l, val):
     for el in l:
         if el == val:
